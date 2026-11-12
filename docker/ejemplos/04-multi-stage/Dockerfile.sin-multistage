@@ -1,0 +1,15 @@
+# Para comparar: la MISMA app, pero en una sola etapa.
+# Esta imagen final se queda con TypeScript, los devDependencies, node_modules
+# completo y el código fuente -- todo lo que la app ya no necesita en runtime.
+#
+# Buildeala con: docker build -f Dockerfile.sin-multistage -t multistage-demo:sin-multistage .
+# y compará el tamaño contra la imagen multi-stage con "docker images".
+
+FROM node:20
+WORKDIR /app
+COPY package*.json tsconfig.json ./
+RUN npm install
+COPY src ./src
+RUN npm run build
+EXPOSE 3000
+CMD ["node", "dist/server.js"]

@@ -1,0 +1,38 @@
+services:
+  app:
+    build: ./app
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: coder
+      DB_PASSWORD: coder123
+      DB_NAME: clase_docker
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - appnet
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: coder
+      POSTGRES_PASSWORD: coder123
+      POSTGRES_DB: clase_docker
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coder"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - appnet
+
+volumes:
+  db_data:
+
+networks:
+  appnet:
