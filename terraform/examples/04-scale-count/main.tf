@@ -1,0 +1,33 @@
+locals {
+  network_name = "${var.project_name}-network"
+}
+
+resource "docker_image" "nginx" {
+  name         = var.image_name
+  keep_locally = false
+}
+
+resource "docker_network" "application" {
+  name = local.network_name
+}
+
+resource "docker_container" "web" {
+  count = var.replicas
+
+  name  = "${var.project_name}-web-${count.index + 1}"
+  image = docker_image.nginx.image_id
+
+  networks_advanced {
+    name = docker_network.application.name
+  }
+
+  ports {
+    internal = 80
+    external = var.base_external_port + count.index
+  }
+
+  labels {
+    label = "managed-by"
+    value = "terraform"
+  }
+}
